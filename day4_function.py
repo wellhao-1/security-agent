@@ -53,7 +53,8 @@ print("=== Day 4 函数练习 ===")
 user_term = input("请输入一个智能体相关英文术语：")
 print(explain_term(user_term))
 
-user_question = input("\n请输入一个问题：")
-question_type = judge_question_type(user_question)
-
-print("问题类型判断结果：", question_type)
+user_question = ""
+while user_question != "q":
+    user_question = input("\n请输入一个问题：")
+    question_type = judge_question_type(user_question)
+    print("问题类型判断结果：", question_type)
