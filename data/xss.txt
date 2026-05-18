@@ -1,0 +1,18 @@
+XSS（Cross Site Scripting）是跨站脚本攻击。
+
+攻击者向网页注入恶意 JavaScript。
+
+分类：
+1. 反射型 XSS
+2. 存储型 XSS
+3. DOM 型 XSS
+
+危害：
+- Cookie 窃取
+- 会话劫持
+- 页面篡改
+
+防御：
+- HTML 转义
+- CSP
+- 输入过滤

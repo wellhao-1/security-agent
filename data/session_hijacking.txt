@@ -1,0 +1,13 @@
+Session Hijacking 是会话劫持攻击。
+
+攻击者窃取 Session ID 后，可以冒充合法用户。
+
+常见方式：
+1. XSS 窃取 Cookie
+2. 网络嗅探
+3. 会话固定攻击
+
+防御：
+- HTTPS
+- HttpOnly Cookie
+- Session 过期机制

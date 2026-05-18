@@ -1,0 +1,20 @@
+IDS 是入侵检测系统（Intrusion Detection System）。
+IPS 是入侵防御系统（Intrusion Prevention System）。
+
+IDS 负责检测攻击行为。
+IPS 不仅检测，还会主动阻断攻击。
+
+检测方式：
+1. 特征检测
+2. 异常检测
+3. 行为分析
+
+常见功能：
+- 攻击识别
+- 告警
+- 流量分析
+- 自动阻断
+
+常见产品：
+- Snort
+- Suricata

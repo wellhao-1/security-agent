@@ -1,0 +1,12 @@
+HTTPS 是 HTTP + TLS。
+
+HTTPS 通过 TLS 建立加密连接。
+
+基本流程：
+1. Client Hello
+2. Server Hello
+3. 证书验证
+4. 密钥协商
+5. 建立加密通信
+
+HTTPS 可以防止中间人攻击。

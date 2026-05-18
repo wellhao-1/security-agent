@@ -1,0 +1,19 @@
+VPN（Virtual Private Network）是虚拟专用网络。
+
+VPN 可以在公共网络上建立安全加密通道。
+
+主要功能：
+- 数据加密
+- 隐藏真实 IP
+- 远程安全访问
+
+常见协议：
+1. OpenVPN
+2. IPSec
+3. WireGuard
+4. PPTP
+
+应用场景：
+- 企业远程办公
+- 隐私保护
+- 跨区域访问
