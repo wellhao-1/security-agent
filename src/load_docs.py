@@ -3,7 +3,7 @@ import os
 
 from utils import print_separator
 
-def load_documents(data_dir="data"):
+def load_documents(data_dir="../data"):
 
     documents = []
     # 检查目录是否存在
