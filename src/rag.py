@@ -1,5 +1,6 @@
 from retriever import TfidfRetriever
 from utils import print_separator
+from llm import SimpleLLM
 
 
 def build_rag_prompt(question, retrieved_chunks):
@@ -41,40 +42,6 @@ def build_rag_prompt(question, retrieved_chunks):
 """
 
     return prompt.strip()
-
-
-class SimpleLLM:
-    """
-    一个简易 LLM 模拟器。
-
-    说明：
-    现在还没有接真实大模型 API，
-    所以这里先用一个简单生成器模拟回答流程。
-
-    后面你可以把这里替换成真正的 LLM API。
-    """
-
-    def generate(self, prompt):
-        """
-        根据 prompt 生成回答。
-        """
-
-        answer = f"""
-这是根据 RAG Prompt 生成的模拟回答。
-
-系统已经完成以下步骤：
-
-1. 接收用户问题
-2. 使用 Retriever 从知识库中检索相关资料
-3. 将检索到的资料拼接进 Prompt
-4. 基于 Prompt 生成回答
-
-下面是当前传入模型的 Prompt：
-
-{prompt}
-"""
-
-        return answer.strip()
 
 
 class RAGPipeline:
