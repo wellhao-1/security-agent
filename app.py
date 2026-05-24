@@ -1,9 +1,9 @@
-# TODO: 实现主应用
 from router import RuleRouter
 from concept import ConceptExplainer
 from advisor import StudyAdvisor
 from web_search import WebSearchAgent
 from rag import RAGPipeline
+from memory import ConversationMemory
 from utils import print_separator
 
 
@@ -18,6 +18,8 @@ class SecurityAgent:
     ↓
     分发到不同模块
     ↓
+    保存对话记忆
+    ↓
     返回答案
     """
 
@@ -31,6 +33,8 @@ class SecurityAgent:
         self.web_search_agent = WebSearchAgent()
 
         self.rag_pipeline = RAGPipeline(top_k=3)
+
+        self.memory = ConversationMemory(max_turns=5)
 
     def build(self):
         """
@@ -50,6 +54,37 @@ class SecurityAgent:
         根据用户问题返回答案。
         """
 
+        if question.strip() == "/memory":
+            memory_text = self.memory.get_context()
+
+            if memory_text == "":
+                answer = "当前没有保存任何对话记忆。"
+            else:
+                answer = memory_text
+
+            return {
+                "label": "memory",
+                "question": question,
+                "answer": answer,
+                "detail": {
+                    "memory": self.memory.get_history()
+                }
+            }
+
+        if question.strip() == "/clear":
+            self.memory.clear()
+
+            return {
+                "label": "memory_clear",
+                "question": question,
+                "answer": "Memory 已清空。",
+                "detail": {}
+            }
+
+        memory_context = self.memory.get_context()
+
+        enhanced_question = self.memory.build_question_with_context(question)
+
         label = self.router.route(question)
 
         print(f"\n[ROUTER] 当前问题标签: {label}")
@@ -57,50 +92,36 @@ class SecurityAgent:
         if label == "concept_explanation":
             result = self.concept_explainer.answer(question)
 
-            return {
-                "label": label,
-                "question": question,
-                "answer": result["answer"],
-                "detail": result
-            }
-
         elif label == "rag_qa":
-            result = self.rag_pipeline.answer(question)
-
-            return {
-                "label": label,
-                "question": question,
-                "answer": result["answer"],
-                "detail": result
-            }
+            result = self.rag_pipeline.answer(enhanced_question)
 
         elif label == "study_advice":
             result = self.study_advisor.answer(question)
 
-            return {
-                "label": label,
-                "question": question,
-                "answer": result["answer"],
-                "detail": result
-            }
-
         elif label == "web_search":
             result = self.web_search_agent.answer(question)
 
-            return {
-                "label": label,
+        else:
+            result = {
                 "question": question,
-                "answer": result["answer"],
-                "detail": result
+                "prompt": "",
+                "answer": "暂不支持该类型问题。"
             }
 
-        else:
-            return {
-                "label": label,
-                "question": question,
-                "answer": "暂不支持该类型问题。",
-                "detail": {}
-            }
+        answer = result["answer"]
+
+        self.memory.add_turn(
+            user_question=question,
+            assistant_answer=answer
+        )
+
+        return {
+            "label": label,
+            "question": question,
+            "answer": answer,
+            "detail": result,
+            "memory_context": memory_context
+        }
 
 
 def print_agent_result(result):
