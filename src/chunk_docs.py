@@ -85,7 +85,7 @@ def chunk_documents(documents, chunk_size=300, overlap=50):
     return all_chunks
 
 
-def save_chunks(chunks, output_path="processed_data/chunks.json"):
+def save_chunks(chunks, output_path="../processed_data/chunks.json"):
     """
     将 chunks 保存为 JSON 文件。
     """

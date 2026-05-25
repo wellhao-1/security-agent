@@ -1,4 +1,5 @@
 from router import RuleRouter
+from router_model import MLRouter
 from concept import ConceptExplainer
 from advisor import StudyAdvisor
 from web_search import WebSearchAgent
@@ -21,10 +22,20 @@ class SecurityAgent:
     保存对话记忆
     ↓
     返回答案
+
+    Day22 新增：
+    优先使用机器学习版 MLRouter。
+    如果 MLRouter 模型不存在，则自动退回 RuleRouter。
     """
 
     def __init__(self):
-        self.router = RuleRouter()
+        # Day22：优先使用机器学习 Router
+        self.router = MLRouter()
+
+        # 如果模型没有成功加载，则退回规则 Router
+        if self.router.model is None:
+            print("[WARNING] MLRouter 不可用，自动切换到 RuleRouter")
+            self.router = RuleRouter()
 
         self.concept_explainer = ConceptExplainer()
 
@@ -54,7 +65,18 @@ class SecurityAgent:
         根据用户问题返回答案。
         """
 
-        if question.strip() == "/memory":
+        question = question.strip()
+
+        if question == "":
+            return {
+                "label": "empty",
+                "question": question,
+                "answer": "请输入有效问题。",
+                "detail": {},
+                "memory_context": self.memory.get_context()
+            }
+
+        if question == "/memory":
             memory_text = self.memory.get_context()
 
             if memory_text == "":
@@ -71,7 +93,7 @@ class SecurityAgent:
                 }
             }
 
-        if question.strip() == "/clear":
+        if question == "/clear":
             self.memory.clear()
 
             return {
@@ -85,6 +107,7 @@ class SecurityAgent:
 
         enhanced_question = self.memory.build_question_with_context(question)
 
+        # Day22：这里的 self.router 可能是 MLRouter，也可能是 RuleRouter
         label = self.router.route(question)
 
         print(f"\n[ROUTER] 当前问题标签: {label}")
@@ -146,7 +169,7 @@ if __name__ == "__main__":
     while True:
         question = input("\n请输入你的问题，输入 q 退出：")
 
-        if question.lower() == "q":
+        if question.lower().strip() == "q":
             print("已退出 Security Agent。")
             break
 
