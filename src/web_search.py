@@ -1,40 +1,71 @@
+import os
+
+from dotenv import load_dotenv
+from tavily import TavilyClient
+
 from llm import SimpleLLM
+
+
+load_dotenv()
 
 
 class WebSearchTool:
     """
-    联网搜索工具模拟版。
+    真实联网搜索工具。
 
-    对应 Router 标签：
-    web_search
-
-    当前版本不真正联网，
-    只是模拟搜索结果。
+    当前使用 Tavily Search API。
     """
 
-    def search(self, query):
+    def __init__(self):
+        self.api_key = os.getenv("TAVILY_API_KEY")
+
+        if not self.api_key:
+            raise ValueError(
+                "未找到 TAVILY_API_KEY，请在项目根目录 .env 文件中配置。"
+            )
+
+        self.client = TavilyClient(
+            api_key=self.api_key
+        )
+
+    def search(self, query, max_results=5):
         """
-        模拟搜索结果。
+        执行真实联网搜索。
+
+        参数：
+        query: 用户问题
+        max_results: 返回搜索结果数量
+
+        返回：
+        results: 搜索结果列表
         """
 
-        print(f"[WEB SEARCH] 模拟联网搜索: {query}")
+        try:
+            response = self.client.search(
+                query=query,
+                search_depth="basic",
+                max_results=max_results
+            )
 
-        results = [
-            {
-                "title": "近期高危漏洞通报示例",
-                "snippet": "近期多个系统出现远程代码执行、权限绕过等高危漏洞，建议及时关注官方安全公告。"
-            },
-            {
-                "title": "安全事件示例",
-                "snippet": "某些攻击活动利用弱口令、钓鱼邮件和未修复漏洞进行入侵，企业应加强补丁管理。"
-            },
-            {
-                "title": "CVE 漏洞信息示例",
-                "snippet": "CVE 编号用于标识公开披露的安全漏洞，分析漏洞时应关注影响范围、利用条件和修复方案。"
-            }
-        ]
+            raw_results = response.get("results", [])
 
-        return results
+            results = []
+
+            for item in raw_results:
+                result = {
+                    "title": item.get("title", ""),
+                    "url": item.get("url", ""),
+                    "snippet": item.get("content", ""),
+                    "score": item.get("score", 0)
+                }
+
+                results.append(result)
+
+            return results
+
+        except Exception as e:
+            print(f"[WEB SEARCH ERROR] Tavily 搜索失败：{e}")
+            return []
 
 
 def build_web_search_prompt(question, search_results):
@@ -42,25 +73,45 @@ def build_web_search_prompt(question, search_results):
     构建联网搜索总结 Prompt。
     """
 
+    if len(search_results) == 0:
+        prompt = f"""
+你是一个信息安全助手。
+
+用户问题：
+{question}
+
+当前没有成功获取到联网搜索结果。
+
+请告诉用户：
+1. 当前无法基于实时搜索结果回答。
+2. 可以稍后重试。
+3. 如果是安全事件或漏洞信息，建议以官方公告、CVE、厂商安全通告为准。
+"""
+        return prompt.strip()
+
     context = ""
 
     for idx, item in enumerate(search_results):
         context += f"\n[搜索结果 {idx + 1}]\n"
         context += f"标题: {item['title']}\n"
+        context += f"链接: {item['url']}\n"
         context += f"摘要: {item['snippet']}\n"
+        context += f"相关性分数: {item['score']}\n"
 
     prompt = f"""
 你是一个信息安全助手。
 
-请根据下面的搜索结果，回答用户问题。
+请根据下面的真实联网搜索结果回答用户问题。
 
 要求：
-1. 说明这是基于搜索结果的总结。
+1. 明确说明答案基于联网搜索结果。
 2. 不要编造搜索结果中没有的信息。
 3. 回答要清晰、分点说明。
-4. 如果信息不足，请提醒用户需要进一步查证。
+4. 如果信息不足，请提醒用户进一步查证。
+5. 尽量保留重要来源链接。
+6. 如果涉及漏洞、CVE、安全事件，请提醒用户以官方公告为准。
 
-搜索结果：
+联网搜索结果：
 {context}
 
 用户问题：
@@ -76,14 +127,17 @@ class WebSearchAgent:
     """
     搜索问答模块。
 
+    对应 Router 标签：
+    web_search
+
     流程：
     用户问题
     ↓
-    WebSearchTool.search()
+    Tavily 搜索
     ↓
-    构建搜索总结 Prompt
+    构建搜索 Prompt
     ↓
-    LLM 生成回答
+    智谱 GLM 总结回答
     """
 
     def __init__(self):
@@ -91,7 +145,10 @@ class WebSearchAgent:
         self.llm = SimpleLLM()
 
     def answer(self, question):
-        search_results = self.search_tool.search(question)
+        search_results = self.search_tool.search(
+            query=question,
+            max_results=5
+        )
 
         prompt = build_web_search_prompt(
             question=question,
