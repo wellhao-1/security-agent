@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from tavily import TavilyClient
 
-from llm import SimpleLLM
+from src.llm import SimpleLLM
 
 
 load_dotenv()

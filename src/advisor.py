@@ -1,5 +1,5 @@
 # TODO: 实现安全顾问模块
-from llm import SimpleLLM
+from src.llm import SimpleLLM
 
 
 def build_advice_prompt(question):

@@ -1,5 +1,5 @@
 # TODO: 实现记忆模块
-from utils import print_separator
+from src.utils import print_separator
 class ConversationMemory:
     def __init__(self,max_turns=5):
         self.max_turns=max_turns
@@ -71,6 +71,49 @@ class ConversationMemory:
             if message["role"]=="user":
                 return message["content"]
         return ""
+
+    def rewrite_question(self, question, llm):
+        """
+        使用 LLM 将当前问题结合历史对话改写成独立问题。
+
+        作用：
+        解决多轮对话中的省略和指代问题。
+
+        例如：
+        历史：用户问过“什么是 SQL 注入？”
+        当前问题：“那怎么防御？”
+        改写后：“SQL 注入怎么防御？”
+        """
+
+        context = self.get_context()
+
+        if context == "":
+            return question
+
+        prompt = f"""
+    你是一个问题改写助手。
+
+    请根据对话历史，将当前用户问题改写成一个语义完整、可以独立理解的问题。
+
+    要求：
+    1. 不要回答问题。
+    2. 只输出改写后的问题。
+    3. 如果当前问题已经完整，直接原样输出。
+    4. 不要添加无关信息。
+    5. 保留用户原本的提问意图。
+
+    对话历史：
+    {context}
+
+    当前用户问题：
+    {question}
+
+    改写后的问题：
+    """
+
+        rewritten_question = llm.generate(prompt)
+
+        return rewritten_question.strip()
 
     def build_question_with_context(self,question):
         """

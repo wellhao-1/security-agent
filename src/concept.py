@@ -1,4 +1,4 @@
-from llm import SimpleLLM
+from src.llm import SimpleLLM
 
 
 def build_concept_prompt(question):

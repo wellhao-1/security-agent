@@ -1,11 +1,11 @@
-from router import RuleRouter
-from router_model import MLRouter
-from concept import ConceptExplainer
-from advisor import StudyAdvisor
-from web_search import WebSearchAgent
-from rag import RAGPipeline
-from memory import ConversationMemory
-from utils import print_separator
+from src.router import RuleRouter
+from src.router_model import MLRouter
+from src.concept import ConceptExplainer
+from src.advisor import StudyAdvisor
+from src.web_search import WebSearchAgent
+from src.rag import RAGPipeline
+from src.memory import ConversationMemory
+from src.utils import print_separator
 
 
 class SecurityAgent:
@@ -115,8 +115,15 @@ class SecurityAgent:
         if label == "concept_explanation":
             result = self.concept_explainer.answer(question)
 
+
         elif label == "rag_qa":
-            result = self.rag_pipeline.answer(enhanced_question)
+            rewritten_question = self.memory.rewrite_question(
+                question=question,
+                llm=self.rag_pipeline.llm
+            )
+            print(f"\n[REWRITE] 原问题: {question}")
+            print(f"[REWRITE] 改写后: {rewritten_question}")
+            result = self.rag_pipeline.answer(rewritten_question)
 
         elif label == "study_advice":
             result = self.study_advisor.answer(question)

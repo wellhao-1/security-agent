@@ -1,7 +1,7 @@
 # TODO: 实现文档加载模块
 import os
 
-from utils import print_separator
+from src.utils import print_separator
 
 def load_documents(data_dir="../data"):
 

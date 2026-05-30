@@ -1,8 +1,8 @@
 import os
 import json
 
-from load_docs import load_documents
-from utils import print_separator
+from src.load_docs import load_documents
+from src.utils import print_separator
 
 
 def chunk_text(text, chunk_size=300, overlap=50):

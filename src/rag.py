@@ -1,6 +1,6 @@
-from retriever import TfidfRetriever
-from utils import print_separator
-from llm import SimpleLLM
+from src.retriever import TfidfRetriever
+from src.utils import print_separator
+from src.llm import SimpleLLM
 
 
 def build_rag_prompt(question, retrieved_chunks):

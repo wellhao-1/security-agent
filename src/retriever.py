@@ -5,7 +5,7 @@ import  json
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from utils import print_separator
+from src.utils import print_separator
 
 def load_chunks(chunk_path="processed_data/chunks.json"):
     """
